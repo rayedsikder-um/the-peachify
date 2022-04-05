@@ -50,16 +50,17 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
     function buyGame(uint256 id, uint256 amount) public {
         uint256 price = getGamePrice(id, amount);
         lastClaimed[msg.sender] = block.timestamp;
-        IERC20(token).safeTransferFrom(msg.sender, address(this), price * amount * rewardPoolPercent / percentDivider);
-        IERC20(token).safeTransferFrom(msg.sender, treasury, price * amount * treasury / percentDivider);
-        IERC20(token).safeTransferFrom(msg.sender, team, price * amount * team / percentDivider);
-        IERC20(token).safeTransferFrom(msg.sender, liquidity, price * amount * liquidity / percentDivider);
+        uint256 priceOfGames = price * amount;
+        IERC20(token).safeTransferFrom(msg.sender, address(this), (priceOfGames * rewardPoolPercent) / percentDivider);
+        IERC20(token).safeTransferFrom(msg.sender, treasury, (priceOfGames * treasuryPercent) / percentDivider);
+        IERC20(token).safeTransferFrom(msg.sender, team, (priceOfGames * teamPercent) / percentDivider);
+        IERC20(token).safeTransferFrom(msg.sender, liquidity, (priceOfGames * liquidityPercent) / percentDivider);
         mint(msg.sender, id, amount, "");
     }
 
     function claimReward(uint256 id) public {
         require(calculateDays(msg.sender) > 30, "PeachNode: Invalid claim");
-        require(rewardRates[id] != 0, "PeachNode: Reward not initialized")
+        require(rewardRates[id] != 0, "PeachNode: Reward not initialized");
         uint256 reward = (balanceOf(msg.sender, id) * calculateDays(msg.sender) * rewardRates[id]) / percentDivider;
         IERC20(token).safeTransfer(msg.sender, reward);
     }
