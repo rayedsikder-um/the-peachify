@@ -48,6 +48,7 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
 
     function buyGame(uint256 id, uint256 amount) public {
         uint256 price = getGamePrice(id, amount);
+        lastClaimed[msg.sender] = block.timestamp;
         IERC20(token).safeTransferFrom(msg.sender, address(this), price * amount * rewardPoolPercent / percentDivider);
         IERC20(token).safeTransferFrom(msg.sender, treasury, price * amount * treasury / percentDivider);
         IERC20(token).safeTransferFrom(msg.sender, team, price * amount * team / percentDivider);
@@ -60,7 +61,7 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
     }
 
     function calculateDays(address _claimer) private returns (uint256) {
-        if(lastClaimed[_claimer] <= 30 * 1 days) {
+        if(block.timestamp - lastClaimed[_claimer] <= 30 * 1 days) {
             revert("PeachNode: Cannot claim before 30 days");
         }
         return (block.timestamp - lastClaimed) / 1 days; 
