@@ -15,6 +15,16 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
     }
     
     mapping(uint256 => GamePrice) gamePriceInfo;
+
+    address treasury;
+    address team;
+    address liquidity;
+    
+    uint256 public constant rewardPoolPercent = 6000;
+    uint256 public constant treasuryPercent = 2000;
+    uint256 public constant teamPercent = 500;
+    uint256 public constant liquidityPercent = 1500;
+    uint256 public constant percentDivider = 10000;
     
     constructor() ERC1155("") {}
     
@@ -35,21 +45,28 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
         }  
     }
 
+    function buyGame(uint256 id, uint256 amount) public {
+        uint256 price = getGamePrice(id, amount);
+        IERC20(token).safeTransferFrom(msg.sender, address(this), price * amount * rewardPoolPercent / percentDivider);
+        IERC20(token).safeTransferFrom(msg.sender, treasury, price * amount * treasury / percentDivider);
+        IERC20(token).safeTransferFrom(msg.sender, team, price * amount * team / percentDivider);
+        IERC20(token).safeTransferFrom(msg.sender, liquidity, price * amount * liquidity / percentDivider);
+        mint(msg.sender, id, amount, "");
+    }
+
     function setURI(string memory newuri) public onlyOwner {
         _setURI(newuri);
     }
 
     function mint(address account, uint256 id, uint256 amount, bytes memory data)
-        public
-        onlyOwner
+        internal
     {
         require(totalSupply(id) + amount <= gameMintLimit[id], "PeachNode: Mint limit reached");   
         _mint(account, id, amount, data);
     }
 
     function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)
-        public
-        onlyOwner
+        internal
     {
         for (uint256 i = 0; i < ids.length; ++i) {
             if(totalSupply(ids[i]) + amounts[i] <= gameMintLimit[ids[i]]) {
