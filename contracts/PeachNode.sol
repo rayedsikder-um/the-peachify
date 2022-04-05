@@ -83,13 +83,6 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
         IERC20(token).safeTransfer(msg.sender, reward);
     }
 
-    function calculateDays(address _claimer) private returns (uint256) {
-        if(block.timestamp - lastClaimed[_claimer] <= 30 * 1 days) {
-            revert("PeachNode: Cannot claim before 30 days");
-        }
-        return (block.timestamp - lastClaimed) / 1 days; 
-    }
-
     function setURI(string memory newuri) public onlyOwner {
         _setURI(newuri);
     }
@@ -154,4 +147,13 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
     {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
+
+    // Private functions
+
+    function calculateDays(address _claimer) private returns (uint256) {
+        if(block.timestamp - lastClaimed[_claimer] <= 30 * 1 days) {
+            revert("PeachNode: Cannot claim before 30 days");
+        }
+        return (block.timestamp - lastClaimed) / 1 days; 
+    }    
 }
