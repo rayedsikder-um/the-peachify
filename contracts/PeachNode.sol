@@ -6,10 +6,24 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 
 contract PeachNode is ERC1155, Ownable, ERC1155Supply {
+    
+    mapping(uint256 => uint256) gameMintLimit;
+    
     constructor() ERC1155("") {}
-
+    
     function setURI(string memory newuri) public onlyOwner {
         _setURI(newuri);
+    }
+
+    function setGameMintLimit(uint256[] memory ids, uint256[] memory limits)
+        external
+        onlyOwner
+    {
+        require(ids.length == limits.length, "PeachNode: ids and limits length mismatch");
+        
+        for (uint256 i = 0; i < ids.length; ++i) {
+            gameMintLimit[i] = limits[i];
+        }
     }
 
     function mint(address account, uint256 id, uint256 amount, bytes memory data)
