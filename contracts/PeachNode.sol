@@ -16,6 +16,7 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
     
     mapping(uint256 => GamePrice) gamePriceInfo;
     mapping(address => uint256) lastClaimed;
+    mapping(uint256 => uint256) rewardRates;
 
     address treasury;
     address team;
@@ -56,8 +57,10 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
         mint(msg.sender, id, amount, "");
     }
 
-    function claimReward() public {
-        
+    function claimReward(uint256 id) public {
+        require(calculateDays(msg.sender) > 30, "PeachNode: Invalid claim");
+        ;
+        IERC20(token).safeTransfer(msg.sender, balanceOf(msg.sender, id) * calculateDays(msg.sender) * rewardRate);
     }
 
     function calculateDays(address _claimer) private returns (uint256) {
@@ -111,6 +114,16 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
             gamePriceInfo[ids[i]].range = ranges[i];
             gamePriceInfo[ids[i]].price = prices[i];
         }
+    }
+
+    function setRewardRates(uint256[] ids, uint256[] rates)
+        external
+        onlyOwner
+    {
+        require(ids.length == rates.length, "PeachNode: ids and rates length mismatch");
+        for (uint256 i = 0; i < ids.length; ++i) {
+            rewardRates[ids[i]] = rates[i];
+        }        
     }    
 
     // The following functions are overrides required by Solidity.
