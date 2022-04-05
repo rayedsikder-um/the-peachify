@@ -18,8 +18,45 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
     
     constructor() ERC1155("") {}
     
+    function getGamePrice(uint256 id, uint256 amount) public view returns (uint256){
+        GamePrice memory gamePrice = gamePriceInfo[id];
+        if (amount == 1) {
+            return gamePrice.price[0];
+        }
+        for (uint256 i = 0; i < gamePrice.range.length; ++i) {
+            if (i+1 != gamePrice.range.length) {
+                if (amount > gamePrice.range[i] && amount <= gamePrice.range[i+1]) {
+                    return gamePrice.price[i];
+                }
+            }
+            else {
+                return gamePrice.price[i-1];
+            }
+        }  
+    }
+
     function setURI(string memory newuri) public onlyOwner {
         _setURI(newuri);
+    }
+
+    function mint(address account, uint256 id, uint256 amount, bytes memory data)
+        public
+        onlyOwner
+    {
+        require(totalSupply(id) + amount <= gameMintLimit[id], "PeachNode: Mint limit reached");   
+        _mint(account, id, amount, data);
+    }
+
+    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)
+        public
+        onlyOwner
+    {
+        for (uint256 i = 0; i < ids.length; ++i) {
+            if(totalSupply(ids[i]) + amounts[i] <= gameMintLimit[ids[i]]) {
+                revert("PeachNode: Mint limit reached");
+            }
+        }        
+        _mintBatch(to, ids, amounts, data);
     }
 
     function setGameMintLimit(uint256[] memory ids, uint256[] memory limits)
@@ -44,27 +81,7 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
             gamePriceInfo[ids[i]].range = ranges[i];
             gamePriceInfo[ids[i]].price = prices[i];
         }
-    }
-
-    function mint(address account, uint256 id, uint256 amount, bytes memory data)
-        public
-        onlyOwner
-    {
-        require(totalSupply(id) + amount <= gameMintLimit[id], "PeachNode: Mint limit reached");   
-        _mint(account, id, amount, data);
-    }
-
-    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)
-        public
-        onlyOwner
-    {
-        for (uint256 i = 0; i < ids.length; ++i) {
-            if(totalSupply(ids[i]) + amounts[i] <= gameMintLimit[ids[i]]) {
-                revert("PeachNode: Mint limit reached");
-            }
-        }        
-        _mintBatch(to, ids, amounts, data);
-    }
+    }    
 
     // The following functions are overrides required by Solidity.
 
