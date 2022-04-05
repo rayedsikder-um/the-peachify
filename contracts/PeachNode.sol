@@ -59,8 +59,9 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
 
     function claimReward(uint256 id) public {
         require(calculateDays(msg.sender) > 30, "PeachNode: Invalid claim");
-        ;
-        IERC20(token).safeTransfer(msg.sender, balanceOf(msg.sender, id) * calculateDays(msg.sender) * rewardRate);
+        require(rewardRates[id] != 0, "PeachNode: Reward not initialized")
+        uint256 reward = (balanceOf(msg.sender, id) * calculateDays(msg.sender) * rewardRates[id]) / percentDivider;
+        IERC20(token).safeTransfer(msg.sender, reward);
     }
 
     function calculateDays(address _claimer) private returns (uint256) {
