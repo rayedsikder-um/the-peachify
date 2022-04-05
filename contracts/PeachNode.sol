@@ -30,6 +30,7 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
         public
         onlyOwner
     {
+        require(totalSupply(id) + amount <= gameMintLimit[id], "PeachNode: Mint limit reached");   
         _mint(account, id, amount, data);
     }
 
