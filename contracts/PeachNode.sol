@@ -18,6 +18,8 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
     mapping(address => uint256) lastClaimed;
     mapping(uint256 => uint256) rewardRates;
 
+    address token;
+
     address treasury;
     address team;
     address liquidity;
@@ -28,7 +30,17 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
     uint256 public constant liquidityPercent = 1500;
     uint256 public constant percentDivider = 10000;
     
-    constructor() ERC1155("") {}
+    constructor(
+        address _token, 
+        address _treasury, 
+        address _team, 
+        address _liquidity) ERC1155("") 
+    {
+        token = _token;
+        treasury = _treasury;
+        team = _team;
+        liquidity = _liquidity;    
+    }
     
     function getGamePrice(uint256 id, uint256 amount) public view returns (uint256){
         GamePrice memory gamePrice = gamePriceInfo[id];
