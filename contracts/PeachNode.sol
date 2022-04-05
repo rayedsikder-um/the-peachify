@@ -8,6 +8,13 @@ import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 contract PeachNode is ERC1155, Ownable, ERC1155Supply {
     
     mapping(uint256 => uint256) gameMintLimit;
+
+    struct GamePrice {
+        uint8[] range;
+        uint8[] price;
+    }
+    
+    mapping(uint256 => GamePrice) gamePriceInfo;
     
     constructor() ERC1155("") {}
     
@@ -23,6 +30,19 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
         
         for (uint256 i = 0; i < ids.length; ++i) {
             gameMintLimit[i] = limits[i];
+        }
+    }
+
+    function setGamePriceInfo(uint256[] memory ids, uint8[][] memory ranges, uint8[][] memory prices)
+        external
+        onlyOwner
+    {
+        require(ids.length == ranges.length, "PeachNode: ids and ranges length mismatch");
+        require(ranges.length == prices.length, "PeachNode: ranges and prices length mismatch");
+
+        for (uint256 i = 0; i < ranges.length; ++i) {
+            gamePriceInfo[ids[i]].range = ranges[i];
+            gamePriceInfo[ids[i]].price = prices[i];
         }
     }
 
