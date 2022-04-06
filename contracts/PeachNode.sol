@@ -155,6 +155,6 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
         if(block.timestamp - lastClaimed[_claimer] <= 30 * 1 days) {
             revert("PeachNode: Cannot claim before 30 days");
         }
-        return (block.timestamp - lastClaimed) / 1 days; 
+        return (block.timestamp - lastClaimed[_claimer]) / 1 days; 
     }    
 }
