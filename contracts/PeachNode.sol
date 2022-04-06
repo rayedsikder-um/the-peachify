@@ -45,6 +45,9 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
     }
     
     function getGamePrice(uint256 id, uint256 amount) public view returns (uint256){
+        require(
+            gamePriceInfo[id].range.length != 0 && gamePriceInfo[id].price.length != 0,
+            "PeachNode: gamePriceInfo not set");
         GamePrice memory gamePrice = gamePriceInfo[id];
         if (amount == 1) {
             return gamePrice.price[0];
@@ -130,7 +133,7 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
         }
     }
 
-    function setRewardRates(uint256[] ids, uint256[] rates)
+    function setRewardRates(uint256[] memory ids, uint256[] memory rates)
         external
         onlyOwner
     {
@@ -151,7 +154,7 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
 
     // Private functions
 
-    function calculateDays(address _claimer) private returns (uint256) {
+    function calculateDays(address _claimer) private view returns (uint256) {
         if(block.timestamp - lastClaimed[_claimer] <= 30 * 1 days) {
             revert("PeachNode: Cannot claim before 30 days");
         }
