@@ -91,24 +91,6 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
         _setURI(newuri);
     }
 
-    function mint(address account, uint256 id, uint256 amount, bytes memory data)
-        internal
-    {
-        require(totalSupply(id) + amount <= gameMintLimit[id], "PeachNode: Mint limit reached");   
-        _mint(account, id, amount, data);
-    }
-
-    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)
-        internal
-    {
-        for (uint256 i = 0; i < ids.length; ++i) {
-            if(totalSupply(ids[i]) + amounts[i] <= gameMintLimit[ids[i]]) {
-                revert("PeachNode: Mint limit reached");
-            }
-        }        
-        _mintBatch(to, ids, amounts, data);
-    }
-
     function setGameMintLimit(uint256[] memory ids, uint256[] memory limits)
         external
         onlyOwner
@@ -159,5 +141,23 @@ contract PeachNode is ERC1155, Ownable, ERC1155Supply {
             revert("PeachNode: Cannot claim before 30 days");
         }
         return (block.timestamp - lastClaimed[_claimer]) / 1 days; 
+    }    
+
+    function mint(address account, uint256 id, uint256 amount, bytes memory data)
+        private
+    {
+        require(totalSupply(id) + amount <= gameMintLimit[id], "PeachNode: Mint limit reached");   
+        _mint(account, id, amount, data);
+    }
+
+    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)
+        private
+    {
+        for (uint256 i = 0; i < ids.length; ++i) {
+            if(totalSupply(ids[i]) + amounts[i] <= gameMintLimit[ids[i]]) {
+                revert("PeachNode: Mint limit reached");
+            }
+        }        
+        _mintBatch(to, ids, amounts, data);
     }    
 }
